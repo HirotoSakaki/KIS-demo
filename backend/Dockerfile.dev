@@ -1,0 +1,19 @@
+FROM node:18-alpine
+
+# 作業ディレクトリを設定
+WORKDIR /app
+
+# package.json と package-lock.json をコピー
+COPY package*.json ./
+
+# 依存関係をインストール（開発環境用）
+RUN npm install
+
+# ソースコードをコピー
+COPY . .
+
+# ポートを公開
+EXPOSE 3001
+
+# 開発サーバーを起動（ホットリロード有効）
+CMD ["npm", "run", "dev"]

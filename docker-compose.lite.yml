@@ -1,0 +1,42 @@
+# Docker Compose 設定ファイル（軽量版）
+
+services:
+  # シンプルなバックエンドのみ構成
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DATABASE_URL=./data/app.db
+      - CORS_ORIGIN=http://localhost:5173
+    networks:
+      - kis-network
+
+  # 軽量なフロントエンド構成
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3001/api
+    depends_on:
+      - backend
+    networks:
+      - kis-network
+
+networks:
+  kis-network:
+    driver: bridge
