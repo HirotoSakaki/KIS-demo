@@ -111,6 +111,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: '/customers', label: '顧客管理', icon: '👥' },
     { path: '/products', label: '商品管理', icon: '📦' },
     { path: '/orders', label: '注文管理', icon: '📝' },
+    { path: '/partners', label: '取引先管理', icon: '🤝' },
+    { path: '/suppliers', label: '仕入先管理', icon: '🏭' },
+    { path: '/invoices', label: '請求書管理', icon: '💸' },
+    { path: '/inventory', label: '在庫管理', icon: '📊' },
   ]
 
   const getPageTitle = (pathname: string) => {

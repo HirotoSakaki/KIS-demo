@@ -8,6 +8,10 @@ import DashboardPage from './pages/DashboardPage'
 import CustomersPage from './pages/CustomersPage'
 import ProductsPage from './pages/ProductsPage'
 import OrdersPage from './pages/OrdersPage'
+import PartnersPage from './pages/PartnersPage'
+import SuppliersPage from './pages/SuppliersPage'
+import InvoicesPage from './pages/InvoicesPage'
+import InventoryPage from './pages/InventoryPage'
 
 function App() {
   return (
@@ -21,6 +25,10 @@ function App() {
             <Route path="/customers" element={<CustomersPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/partners" element={<PartnersPage />} />
+            <Route path="/suppliers" element={<SuppliersPage />} />
+            <Route path="/invoices" element={<InvoicesPage />} />
+            <Route path="/inventory" element={<InventoryPage />} />
           </Routes>
         </Layout>
       </Router>
