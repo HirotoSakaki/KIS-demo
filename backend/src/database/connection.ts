@@ -3,6 +3,11 @@ import { open } from 'sqlite'
 import type { Database } from 'sqlite'
 import path from 'path'
 import fs from 'fs'
+import { fileURLToPath } from 'url'
+
+// ES Modules環境での __dirname の代替
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 export class DatabaseConnection {
   private static instance: Database | null = null

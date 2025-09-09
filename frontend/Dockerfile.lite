@@ -1,0 +1,15 @@
+# 軽量版 Dockerfile（企業環境対応）
+FROM node:18-alpine
+
+WORKDIR /app
+
+# package.json のみコピーして依存関係をインストール
+COPY package*.json ./
+RUN npm install
+
+# ソースコードをコピー
+COPY . .
+
+# 開発サーバーを起動（ホットリロード有効）
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
