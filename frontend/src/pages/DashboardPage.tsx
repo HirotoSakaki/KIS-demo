@@ -380,11 +380,11 @@ const DashboardPage: React.FC = () => {
   // 最近のアクティビティ
   const recentActivities = [
     { icon: '🆕', text: 'サンプル自動車株式会社から新規注文', time: '2分前', color: '#3b82f6' },
-    { icon: '📦', text: 'SAMPLE PIONEER が横浜港に入港', time: '15分前', color: '#10b981' },
+    { icon: '📦', text: 'ビジネスノートパソコン Pro の在庫補充完了', time: '15分前', color: '#10b981' },
     { icon: '💰', text: '請求書 INV-2024-158 が支払い完了', time: '32分前', color: '#f59e0b' },
     { icon: '👥', text: 'グローバル電子株式会社が新規登録', time: '1時間前', color: '#8b5cf6' },
-    { icon: '📋', text: 'B/L KLNE240105010 の書類が完成', time: '2時間前', color: '#06d6a0' },
-    { icon: '🚢', text: 'SAMPLE BULK が Long Beach に向けて出港', time: '3時間前', color: '#0f172a' }
+    { icon: '📋', text: '契約書 CON-2024-010 の書類が完成', time: '2時間前', color: '#06d6a0' },
+    { icon: '🚛', text: 'サンプル重工業への大型商品配送が完了', time: '3時間前', color: '#0f172a' }
   ]
 
   const maxSalesAmount = Math.max(...salesData.map(d => d.amount))
@@ -399,7 +399,7 @@ const DashboardPage: React.FC = () => {
   return (
     <DashboardContainer>
       <WelcomeSection>
-        <WelcomeTitle>KIS Demo 統合管理システム</WelcomeTitle>
+        <WelcomeTitle> 統合管理システム</WelcomeTitle>
         <WelcomeText>リアルタイム業務ダッシュボード - 全社データを一元監視</WelcomeText>
       </WelcomeSection>
 

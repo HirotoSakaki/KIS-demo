@@ -125,7 +125,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <LayoutContainer>
       <Sidebar>
-        <Logo>📋 KIS Demo</Logo>
+        <Logo>📋 KIS様向け Demo</Logo>
         <NavList>
           {navigationItems.map((item) => (
             <NavItem key={item.path} $isActive={location.pathname === item.path}>

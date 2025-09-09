@@ -1,32 +1,40 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 
-interface Cargo {
+interface Order {
   id: number
-  bl_number: string
-  booking_number: string
-  container_numbers: string[]
-  shipper_name: string
-  consignee_name: string
-  commodity: string
-  cargo_type: 'FCL' | 'LCL' | 'Break_Bulk' | 'Reefer'
-  weight_kg: number
-  volume_cbm: number
-  teu_count: number
-  port_of_loading: string
-  port_of_discharge: string
-  vessel_name: string
-  voyage_number: string
-  etd: string
-  eta: string
-  cargo_status: 'booking' | 'loaded' | 'in_transit' | 'discharged' | 'delivered'
-  temperature?: number
-  special_handling: string[]
-  dangerous_goods: boolean
-  customs_status: 'pending' | 'cleared' | 'examination'
-  documentation_complete: boolean
-  freight_charges: number
+  order_number: string
+  customer_name: string
+  customer_email: string
+  order_date: string
+  delivery_date: string
+  order_status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded'
+  total_amount: number
   currency: string
+  items: {
+    product_name: string
+    quantity: number
+    unit_price: number
+  }[]
+  shipping_address: {
+    address: string
+    city: string
+    postal_code: string
+    country: string
+  }
+  billing_address: {
+    address: string
+    city: string
+    postal_code: string
+    country: string
+  }
+  shipping_method: string
+  tracking_number?: string
+  notes?: string
+  discount_amount: number
+  tax_amount: number
+  shipping_cost: number
 }
 
 const PageContainer = styled.div`
@@ -39,138 +47,89 @@ const PageContainer = styled.div`
 const Header = styled.div`
   padding: ${({ theme }) => theme.spacing.lg};
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-  background: linear-gradient(135deg, #7c2d12 0%, #ea580c 30%, #f97316 100%);
+  background: linear-gradient(135deg, #7c2d12 0%, #dc2626 100%);
   color: white;
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '📦';
-    position: absolute;
-    top: 50%;
-    right: 20px;
-    transform: translateY(-50%);
-    font-size: 60px;
-    opacity: 0.2;
-  }
 `
 
 const Title = styled.h1`
   font-size: ${({ theme }) => theme.fontSize.xxl};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   margin: 0 0 ${({ theme }) => theme.spacing.sm} 0;
-  position: relative;
-  z-index: 1;
 `
 
 const Subtitle = styled.p`
   font-size: ${({ theme }) => theme.fontSize.md};
   opacity: 0.9;
   margin: 0;
-  position: relative;
-  z-index: 1;
 `
 
 const ControlsSection = styled.div`
   padding: ${({ theme }) => theme.spacing.lg};
-  background: ${({ theme }) => theme.colors.gray50};
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
   gap: ${({ theme }) => theme.spacing.md};
+  flex-wrap: wrap;
+  align-items: center;
+  background: ${({ theme }) => theme.colors.gray50};
 `
 
-const SearchSection = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
-  align-items: center;
-  flex-wrap: wrap;
-`
-
-const SearchInput = styled.input`
+const SearchBox = styled.input`
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.borderRadius.md};
-  font-size: ${({ theme }) => theme.fontSize.md};
-  min-width: 250px;
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  flex: 1;
+  min-width: 200px;
   
   &:focus {
     outline: none;
-    border-color: #ea580c;
-    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
   }
 `
 
-const Select = styled.select`
+const FilterSelect = styled.select`
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.borderRadius.md};
-  font-size: ${({ theme }) => theme.fontSize.md};
+  font-size: ${({ theme }) => theme.fontSize.sm};
   background: white;
-  min-width: 150px;
   
   &:focus {
     outline: none;
-    border-color: #ea580c;
-    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+    border-color: ${({ theme }) => theme.colors.primary};
   }
 `
 
-const Button = styled.button<{ $variant?: 'primary' | 'secondary' | 'danger' | 'success'; $disabled?: boolean }>`
+const Button = styled.button<{ $variant?: 'primary' | 'secondary' | 'danger' }>`
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
   border: none;
   border-radius: ${({ theme }) => theme.borderRadius.md};
-  font-size: ${({ theme }) => theme.fontSize.md};
+  font-size: ${({ theme }) => theme.fontSize.sm};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   cursor: pointer;
   transition: ${({ theme }) => theme.transitions.normal};
-  position: relative;
   
-  ${({ theme, $variant = 'primary', $disabled }) => {
-    if ($disabled) {
-      return `
-        background-color: ${theme.colors.gray300};
-        color: ${theme.colors.gray500};
-        cursor: not-allowed;
-        opacity: 0.6;
-      `
-    }
-    
+  ${({ $variant, theme }) => {
     switch ($variant) {
       case 'primary':
         return `
-          background: linear-gradient(135deg, #7c2d12 0%, #ea580c 100%);
-          color: ${theme.colors.white};
-          &:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: ${theme.shadows.md};
-          }
-        `
-      case 'secondary':
-        return `
-          background-color: ${theme.colors.gray500};
-          color: ${theme.colors.white};
-          &:hover:not(:disabled) {
-            background-color: ${theme.colors.gray600};
-          }
+          background: ${theme.colors.primary};
+          color: white;
+          &:hover { background: ${theme.colors.primaryDark}; }
         `
       case 'danger':
         return `
-          background-color: ${theme.colors.danger};
-          color: ${theme.colors.white};
-          &:hover:not(:disabled) {
-            background-color: #c82333;
-          }
+          background: ${theme.colors.danger};
+          color: white;
+          &:hover { background: ${theme.colors.dangerDark}; }
         `
-      case 'success':
+      default:
         return `
-          background-color: ${theme.colors.success};
-          color: ${theme.colors.white};
-          &:hover:not(:disabled) {
-            background-color: #1e7e34;
-          }
+          background: white;
+          color: ${theme.colors.textPrimary};
+          border: 1px solid ${theme.colors.border};
+          &:hover { background: ${theme.colors.gray50}; }
         `
     }
   }}
@@ -179,31 +138,35 @@ const Button = styled.button<{ $variant?: 'primary' | 'secondary' | 'danger' | '
 const StatsContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: ${({ theme }) => theme.spacing.lg};
+  gap: ${({ theme }) => theme.spacing.md};
   padding: ${({ theme }) => theme.spacing.lg};
   background: ${({ theme }) => theme.colors.gray50};
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
 `
 
 const StatCard = styled.div<{ $color: string }>`
-  background: ${({ theme }) => theme.colors.white};
-  padding: ${({ theme }) => theme.spacing.lg};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  text-align: center;
-  box-shadow: ${({ theme }) => theme.shadows.sm};
+  background: white;
+  padding: ${({ theme }) => theme.spacing.md};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
   border-left: 4px solid ${({ $color }) => $color};
+  box-shadow: ${({ theme }) => theme.shadows.sm};
 `
 
 const StatValue = styled.div<{ $color: string }>`
-  font-size: ${({ theme }) => theme.fontSize.xxl};
+  font-size: ${({ theme }) => theme.fontSize.xl};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   color: ${({ $color }) => $color};
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  margin-bottom: ${({ theme }) => theme.spacing.xs};
 `
 
 const StatLabel = styled.div`
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.colors.textSecondary};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+`
+
+const TableContainer = styled.div`
+  overflow-x: auto;
 `
 
 const Table = styled.table`
@@ -211,127 +174,76 @@ const Table = styled.table`
   border-collapse: collapse;
 `
 
-const Th = styled.th`
-  background-color: ${({ theme }) => theme.colors.gray100};
+const TableHeader = styled.thead`
+  background: ${({ theme }) => theme.colors.gray100};
+`
+
+const TableRow = styled.tr`
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  
+  &:hover {
+    background: ${({ theme }) => theme.colors.gray50};
+  }
+`
+
+const TableHeaderCell = styled.th`
   padding: ${({ theme }) => theme.spacing.md};
   text-align: left;
   font-weight: ${({ theme }) => theme.fontWeight.semibold};
   color: ${({ theme }) => theme.colors.textPrimary};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  white-space: nowrap;
 `
 
-const Td = styled.td`
+const TableCell = styled.td`
   padding: ${({ theme }) => theme.spacing.md};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.borderLight};
+  font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.colors.textPrimary};
+  white-space: nowrap;
 `
 
 const StatusBadge = styled.span<{ $status: string }>`
-  display: inline-block;
   padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
   border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  font-weight: ${({ theme }) => theme.fontWeight.medium};
-  
-  ${({ theme, $status }) => {
-    switch ($status) {
-      case 'booking':
-        return `
-          background-color: ${theme.colors.warning};
-          color: ${theme.colors.dark};
-        `
-      case 'loaded':
-        return `
-          background-color: ${theme.colors.info};
-          color: ${theme.colors.white};
-        `
-      case 'in_transit':
-        return `
-          background-color: #7c2d12;
-          color: ${theme.colors.white};
-        `
-      case 'discharged':
-        return `
-          background-color: #ea580c;
-          color: ${theme.colors.white};
-        `
-      case 'delivered':
-        return `
-          background-color: ${theme.colors.success};
-          color: ${theme.colors.white};
-        `
-    }
-  }}
-`
-
-const TypeBadge = styled.span<{ $type: string }>`
-  display: inline-block;
-  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
   font-size: ${({ theme }) => theme.fontSize.xs};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   
-  ${({ theme, $type }) => {
-    switch ($type) {
-      case 'FCL':
-        return `
-          background-color: #7c2d12;
-          color: ${theme.colors.white};
-        `
-      case 'LCL':
-        return `
-          background-color: #ea580c;
-          color: ${theme.colors.white};
-        `
-      case 'Break_Bulk':
-        return `
-          background-color: #f97316;
-          color: ${theme.colors.white};
-        `
-      case 'Reefer':
-        return `
-          background-color: #059669;
-          color: ${theme.colors.white};
-        `
-    }
-  }}
-`
-
-const SpecialBadge = styled.span`
-  display: inline-block;
-  padding: 2px 6px;
-  margin: 2px;
-  background: #dc2626;
-  color: white;
-  border-radius: 12px;
-  font-size: 10px;
-  font-weight: bold;
-`
-
-const CustomsBadge = styled.span<{ $status: string }>`
-  display: inline-block;
-  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  font-weight: ${({ theme }) => theme.fontWeight.medium};
-  
-  ${({ theme, $status }) => {
+  ${({ $status, theme }) => {
     switch ($status) {
       case 'pending':
-        return `
-          background-color: ${theme.colors.warning};
-          color: ${theme.colors.dark};
-        `
-      case 'cleared':
-        return `
-          background-color: ${theme.colors.success};
-          color: ${theme.colors.white};
-        `
-      case 'examination':
-        return `
-          background-color: ${theme.colors.danger};
-          color: ${theme.colors.white};
-        `
+        return `background: ${theme.colors.warning}20; color: ${theme.colors.warning};`
+      case 'processing':
+        return `background: ${theme.colors.info}20; color: ${theme.colors.info};`
+      case 'shipped':
+        return `background: ${theme.colors.primary}20; color: ${theme.colors.primary};`
+      case 'delivered':
+        return `background: ${theme.colors.success}20; color: ${theme.colors.success};`
+      case 'cancelled':
+        return `background: ${theme.colors.danger}20; color: ${theme.colors.danger};`
+      default:
+        return `background: ${theme.colors.gray200}; color: ${theme.colors.textSecondary};`
+    }
+  }}
+`
+
+const PaymentBadge = styled.span<{ $status: string }>`
+  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  
+  ${({ $status, theme }) => {
+    switch ($status) {
+      case 'pending':
+        return `background: ${theme.colors.warning}20; color: ${theme.colors.warning};`
+      case 'paid':
+        return `background: ${theme.colors.success}20; color: ${theme.colors.success};`
+      case 'failed':
+        return `background: ${theme.colors.danger}20; color: ${theme.colors.danger};`
+      case 'refunded':
+        return `background: ${theme.colors.gray500}20; color: ${theme.colors.gray500};`
+      default:
+        return `background: ${theme.colors.gray200}; color: ${theme.colors.textSecondary};`
     }
   }}
 `
@@ -342,373 +254,378 @@ const ActionButtons = styled.div`
   flex-wrap: wrap;
 `
 
-const WeightText = styled.span`
-  font-weight: ${({ theme }) => theme.fontWeight.semibold};
-  color: #7c2d12;
+const ItemsList = styled.div`
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  max-width: 200px;
 `
 
 const OrdersPage: React.FC = () => {
-  const [cargos] = useState<Cargo[]>([
+  const [orders] = useState<Order[]>([
     {
       id: 1,
-      bl_number: 'KLNE240101001',
-      booking_number: 'BKG240101001',
-      container_numbers: ['KLNU1234567', 'KLNU1234568'],
-      shipper_name: 'サンプル自動車株式会社',
-      consignee_name: 'Sample Motor North America',
-      commodity: '自動車部品',
-      cargo_type: 'FCL',
-      weight_kg: 24500,
-      volume_cbm: 67.2,
-      teu_count: 2,
-      port_of_loading: '名古屋港',
-      port_of_discharge: 'Long Beach',
-      vessel_name: 'SAMPLE PIONEER',
-      voyage_number: 'TOK-LAX-001',
-      etd: '2024-01-15T10:00:00Z',
-      eta: '2024-01-30T08:00:00Z',
-      cargo_status: 'in_transit',
-      special_handling: [],
-      dangerous_goods: false,
-      customs_status: 'cleared',
-      documentation_complete: true,
-      freight_charges: 2450000,
-      currency: 'JPY'
+      order_number: 'ORD-2024-001',
+      customer_name: 'サンプル自動車株式会社',
+      customer_email: 'orders@sample-auto.co.jp',
+      order_date: '2024-01-15T09:30:00Z',
+      delivery_date: '2024-01-25T14:00:00Z',
+      order_status: 'delivered',
+      payment_status: 'paid',
+      total_amount: 2850000,
+      currency: 'JPY',
+      items: [
+        { product_name: 'ビジネスノートパソコン Pro', quantity: 50, unit_price: 89800 },
+        { product_name: 'オフィス家具セット', quantity: 15, unit_price: 45000 }
+      ],
+      shipping_address: {
+        address: '愛知県豊田市トヨタ町1-1',
+        city: '豊田市',
+        postal_code: '471-8571',
+        country: '日本'
+      },
+      billing_address: {
+        address: '愛知県豊田市トヨタ町1-1',
+        city: '豊田市',
+        postal_code: '471-8571',
+        country: '日本'
+      },
+      shipping_method: '特急配送',
+      tracking_number: 'TRK-001234567',
+      discount_amount: 150000,
+      tax_amount: 285000,
+      shipping_cost: 25000
     },
     {
       id: 2,
-      bl_number: 'KLNE240102002',
-      booking_number: 'BKG240102002',
-      container_numbers: ['KLNU2345678'],
-      shipper_name: 'グローバル電子株式会社',
-      consignee_name: 'Sample Electronics America Inc.',
-      commodity: '電子部品',
-      cargo_type: 'FCL',
-      weight_kg: 18200,
-      volume_cbm: 58.5,
-      teu_count: 1,
-      port_of_loading: '釜山港',
-      port_of_discharge: 'Los Angeles',
-      vessel_name: 'SAMPLE VOYAGER',
-      voyage_number: 'SIN-LAX-042',
-      etd: '2024-01-18T14:30:00Z',
-      eta: '2024-02-05T12:00:00Z',
-      cargo_status: 'loaded',
-      special_handling: ['温度管理'],
-      dangerous_goods: false,
-      customs_status: 'pending',
-      documentation_complete: true,
-      freight_charges: 185000,
-      currency: 'USD'
+      order_number: 'ORD-2024-002',
+      customer_name: 'グローバル電子株式会社',
+      customer_email: 'procurement@global-electronics.co.jp',
+      order_date: '2024-01-18T11:15:00Z',
+      delivery_date: '2024-01-28T10:00:00Z',
+      order_status: 'shipped',
+      payment_status: 'paid',
+      total_amount: 1580000,
+      currency: 'JPY',
+      items: [
+        { product_name: 'クラウドストレージ サービス', quantity: 100, unit_price: 1200 },
+        { product_name: 'ITコンサルティング サービス', quantity: 8, unit_price: 180000 }
+      ],
+      shipping_address: {
+        address: '東京都港区芝浦1-1-1',
+        city: '東京都',
+        postal_code: '105-0023',
+        country: '日本'
+      },
+      billing_address: {
+        address: '東京都港区芝浦1-1-1',
+        city: '東京都',
+        postal_code: '105-0023',
+        country: '日本'
+      },
+      shipping_method: '標準配送',
+      tracking_number: 'TRK-001234568',
+      discount_amount: 80000,
+      tax_amount: 158000,
+      shipping_cost: 12000
     },
     {
       id: 3,
-      bl_number: 'KLNE240103003',
-      booking_number: 'BKG240103003',
-      container_numbers: ['REFR3456789'],
-      shipper_name: 'オーシャン水産株式会社',
-      consignee_name: 'Ocean Importers LLC',
-      commodity: '冷凍魚介類',
-      cargo_type: 'Reefer',
-      weight_kg: 22000,
-      volume_cbm: 62.0,
-      teu_count: 1,
-      port_of_loading: '東京港',
-      port_of_discharge: 'Seattle',
-      vessel_name: 'REEFER EXPRESS',
-      voyage_number: 'TOK-SEA-015',
-      etd: '2024-01-20T06:00:00Z',
-      eta: '2024-02-08T18:00:00Z',
-      cargo_status: 'booking',
-      temperature: -18,
-      special_handling: ['冷凍保管', '温度記録'],
-      dangerous_goods: false,
-      customs_status: 'pending',
-      documentation_complete: false,
-      freight_charges: 320000,
-      currency: 'USD'
+      order_number: 'ORD-2024-003',
+      customer_name: 'オーシャン水産株式会社',
+      customer_email: 'info@ocean-fishery.co.jp',
+      order_date: '2024-01-20T14:45:00Z',
+      delivery_date: '2024-02-01T09:00:00Z',
+      order_status: 'processing',
+      payment_status: 'paid',
+      total_amount: 750000,
+      currency: 'JPY',
+      items: [
+        { product_name: 'モバイルアプリ開発ツール', quantity: 30, unit_price: 25000 }
+      ],
+      shipping_address: {
+        address: '静岡県焼津市本町2-2-2',
+        city: '焼津市',
+        postal_code: '425-0021',
+        country: '日本'
+      },
+      billing_address: {
+        address: '静岡県焼津市本町2-2-2',
+        city: '焼津市',
+        postal_code: '425-0021',
+        country: '日本'
+      },
+      shipping_method: '標準配送',
+      discount_amount: 0,
+      tax_amount: 75000,
+      shipping_cost: 8000
     },
     {
       id: 4,
-      bl_number: 'KLNE240104004',
-      booking_number: 'BKG240104004',
-      container_numbers: ['KLNU4567890', 'KLNU4567891', 'KLNU4567892'],
-      shipper_name: 'サンプル重工業株式会社',
-      consignee_name: 'Sample Industries Europe',
-      commodity: '産業機械',
-      cargo_type: 'FCL',
-      weight_kg: 45000,
-      volume_cbm: 95.5,
-      teu_count: 3,
-      port_of_loading: '神戸港',
-      port_of_discharge: 'Rotterdam',
-      vessel_name: 'SAMPLE BULK',
-      voyage_number: 'KOB-RTM-008',
-      etd: '2024-01-25T09:00:00Z',
-      eta: '2024-02-20T15:00:00Z',
-      cargo_status: 'discharged',
-      special_handling: ['重量物'],
-      dangerous_goods: false,
-      customs_status: 'examination',
-      documentation_complete: true,
-      freight_charges: 4500000,
-      currency: 'JPY'
+      order_number: 'ORD-2024-004',
+      customer_name: 'サンプル重工業株式会社',
+      customer_email: 'orders@sample-heavy.co.jp',
+      order_date: '2024-01-22T16:20:00Z',
+      delivery_date: '2024-02-05T15:00:00Z',
+      order_status: 'pending',
+      payment_status: 'pending',
+      total_amount: 4200000,
+      currency: 'JPY',
+      items: [
+        { product_name: 'ビジネスノートパソコン Pro', quantity: 35, unit_price: 89800 },
+        { product_name: 'オフィス家具セット', quantity: 20, unit_price: 45000 },
+        { product_name: 'ITコンサルティング サービス', quantity: 5, unit_price: 180000 }
+      ],
+      shipping_address: {
+        address: '神奈川県横浜市西区みなとみらい3-3-3',
+        city: '横浜市',
+        postal_code: '220-0012',
+        country: '日本'
+      },
+      billing_address: {
+        address: '神奈川県横浜市西区みなとみらい3-3-3',
+        city: '横浜市',
+        postal_code: '220-0012',
+        country: '日本'
+      },
+      shipping_method: '特急配送',
+      discount_amount: 200000,
+      tax_amount: 420000,
+      shipping_cost: 35000
     },
     {
       id: 5,
-      bl_number: 'KLNE240105005',
-      booking_number: 'BKG240105005',
-      container_numbers: ['HZRD5678901'],
-      shipper_name: 'サンプル化学株式会社',
-      consignee_name: 'Sample Chemical Solutions Inc.',
-      commodity: '工業用化学品',
-      cargo_type: 'FCL',
-      weight_kg: 19500,
-      volume_cbm: 45.2,
-      teu_count: 1,
-      port_of_loading: '横浜港',
-      port_of_discharge: 'New York',
-      vessel_name: 'ENERGY FRONTIER',
-      voyage_number: 'YOK-NYC-012',
-      etd: '2024-01-28T12:00:00Z',
-      eta: '2024-02-18T10:00:00Z',
-      cargo_status: 'delivered',
-      special_handling: ['危険物', '特別取扱'],
-      dangerous_goods: true,
-      customs_status: 'cleared',
-      documentation_complete: true,
-      freight_charges: 285000,
-      currency: 'USD'
+      order_number: 'ORD-2024-005',
+      customer_name: 'サンプル化学株式会社',
+      customer_email: 'purchasing@sample-chemical.co.jp',
+      order_date: '2024-01-25T08:30:00Z',
+      delivery_date: '2024-02-08T11:00:00Z',
+      order_status: 'cancelled',
+      payment_status: 'refunded',
+      total_amount: 320000,
+      currency: 'JPY',
+      items: [
+        { product_name: 'クラウドストレージ サービス', quantity: 200, unit_price: 1200 },
+        { product_name: 'モバイルアプリ開発ツール', quantity: 4, unit_price: 25000 }
+      ],
+      shipping_address: {
+        address: '大阪府大阪市北区梅田4-4-4',
+        city: '大阪市',
+        postal_code: '530-0001',
+        country: '日本'
+      },
+      billing_address: {
+        address: '大阪府大阪市北区梅田4-4-4',
+        city: '大阪市',
+        postal_code: '530-0001',
+        country: '日本'
+      },
+      shipping_method: '標準配送',
+      notes: 'お客様都合によりキャンセル',
+      discount_amount: 20000,
+      tax_amount: 32000,
+      shipping_cost: 10000
     }
   ])
 
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
-  const [typeFilter, setTypeFilter] = useState('')
+  const [paymentFilter, setPaymentFilter] = useState('')
 
   // フィルタリング
-  const filteredCargos = cargos.filter(cargo => {
+  const filteredOrders = orders.filter(order => {
     const matchesSearch = 
-      cargo.bl_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cargo.booking_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cargo.shipper_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cargo.container_numbers.some(num => num.toLowerCase().includes(searchTerm.toLowerCase()))
+      order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (order.tracking_number && order.tracking_number.toLowerCase().includes(searchTerm.toLowerCase()))
     
-    const matchesStatus = statusFilter === '' || cargo.cargo_status === statusFilter
-    const matchesType = typeFilter === '' || cargo.cargo_type === typeFilter
+    const matchesStatus = statusFilter === '' || order.order_status === statusFilter
+    const matchesPayment = paymentFilter === '' || order.payment_status === paymentFilter
     
-    return matchesSearch && matchesStatus && matchesType
+    return matchesSearch && matchesStatus && matchesPayment
   })
 
   // 統計計算
-  const totalCargos = cargos.length
-  const inTransitCargos = cargos.filter(c => c.cargo_status === 'in_transit' || c.cargo_status === 'loaded').length
-  const totalTEU = cargos.reduce((sum, c) => sum + c.teu_count, 0)
-  const totalWeight = cargos.reduce((sum, c) => sum + c.weight_kg, 0)
+  const totalOrders = orders.length
+  const processingOrders = orders.filter(o => o.order_status === 'processing' || o.order_status === 'shipped').length
+  const totalRevenue = orders.filter(o => o.payment_status === 'paid').reduce((sum, o) => sum + o.total_amount, 0)
+  const averageOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
   const getStatusLabel = (status: string) => {
-    const labels = {
-      booking: '予約済み',
-      loaded: '積載済み',
-      in_transit: '輸送中',
-      discharged: '荷卸済み',
-      delivered: '配達完了'
+    switch (status) {
+      case 'pending': return '待機中'
+      case 'processing': return '処理中'
+      case 'shipped': return '発送済み'
+      case 'delivered': return '配送完了'
+      case 'cancelled': return 'キャンセル'
+      default: return status
     }
-    return labels[status as keyof typeof labels] || status
   }
 
-  const getTypeLabel = (type: string) => {
-    const labels = {
-      FCL: 'FCL',
-      LCL: 'LCL',
-      Break_Bulk: '在来船',
-      Reefer: '冷凍貨物'
+  const getPaymentLabel = (status: string) => {
+    switch (status) {
+      case 'pending': return '支払い待ち'
+      case 'paid': return '支払い済み'
+      case 'failed': return '支払い失敗'
+      case 'refunded': return '返金済み'
+      default: return status
     }
-    return labels[type as keyof typeof labels] || type
   }
 
-  const getCustomsLabel = (status: string) => {
-    const labels = {
-      pending: '申告中',
-      cleared: '通関済み',
-      examination: '検査中'
-    }
-    return labels[status as keyof typeof labels] || status
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ja-JP', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
   }
 
   return (
     <PageContainer>
       <Header>
         <Title>注文管理</Title>
-        <Subtitle>注文処理・ステータス管理</Subtitle>
+        <Subtitle>注文処理・配送追跡・売上分析の統合管理</Subtitle>
       </Header>
 
       <ControlsSection>
-        <SearchSection>
-          <SearchInput
-            type="text"
-            placeholder="B/L番号・Booking番号・荷主名で検索..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="">全ステータス</option>
-            <option value="booking">予約済み</option>
-            <option value="loaded">積載済み</option>
-            <option value="in_transit">輸送中</option>
-            <option value="discharged">荷卸済み</option>
-            <option value="delivered">配達完了</option>
-          </Select>
-          <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-            <option value="">全貨物タイプ</option>
-            <option value="FCL">FCL</option>
-            <option value="LCL">LCL</option>
-            <option value="Break_Bulk">在来船</option>
-            <option value="Reefer">冷凍貨物</option>
-          </Select>
-          <Button>検索</Button>
-        </SearchSection>
+        <SearchBox
+          type="text"
+          placeholder="注文番号、顧客名、メールアドレス、追跡番号で検索..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         
+        <FilterSelect
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">全ステータス</option>
+          <option value="pending">待機中</option>
+          <option value="processing">処理中</option>
+          <option value="shipped">発送済み</option>
+          <option value="delivered">配送完了</option>
+          <option value="cancelled">キャンセル</option>
+        </FilterSelect>
+
+        <FilterSelect
+          value={paymentFilter}
+          onChange={(e) => setPaymentFilter(e.target.value)}
+        >
+          <option value="">全支払状況</option>
+          <option value="pending">支払い待ち</option>
+          <option value="paid">支払い済み</option>
+          <option value="failed">支払い失敗</option>
+          <option value="refunded">返金済み</option>
+        </FilterSelect>
+
         <Button $variant="primary">
-          新規Booking
+          新規注文作成
         </Button>
       </ControlsSection>
 
       <StatsContainer>
         <StatCard $color="#7c2d12">
-          <StatValue $color="#7c2d12">{totalCargos}</StatValue>
-          <StatLabel>総貨物件数</StatLabel>
+          <StatValue $color="#7c2d12">{totalOrders}</StatValue>
+          <StatLabel>総注文数</StatLabel>
         </StatCard>
-        <StatCard $color="#ea580c">
-          <StatValue $color="#ea580c">{inTransitCargos}</StatValue>
-          <StatLabel>輸送中</StatLabel>
-        </StatCard>
-        <StatCard $color="#f97316">
-          <StatValue $color="#f97316">{totalTEU} TEU</StatValue>
-          <StatLabel>総コンテナ数</StatLabel>
+        <StatCard $color="#1d4ed8">
+          <StatValue $color="#1d4ed8">{processingOrders}</StatValue>
+          <StatLabel>処理中</StatLabel>
         </StatCard>
         <StatCard $color="#10b981">
-          <StatValue $color="#10b981">{(totalWeight / 1000).toFixed(1)}t</StatValue>
-          <StatLabel>総重量</StatLabel>
+          <StatValue $color="#10b981">¥{totalRevenue.toLocaleString()}</StatValue>
+          <StatLabel>総売上</StatLabel>
+        </StatCard>
+        <StatCard $color="#f59e0b">
+          <StatValue $color="#f59e0b">¥{Math.round(averageOrder).toLocaleString()}</StatValue>
+          <StatLabel>平均注文額</StatLabel>
         </StatCard>
       </StatsContainer>
 
-      <Table>
-        <thead>
-          <tr>
-            <Th>B/L・Booking情報</Th>
-            <Th>荷主・荷受人</Th>
-            <Th>貨物情報</Th>
-            <Th>航路・船舶</Th>
-            <Th>スケジュール</Th>
-            <Th>通関・書類</Th>
-            <Th>ステータス</Th>
-            <Th>操作</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredCargos.map((cargo) => (
-            <tr key={cargo.id}>
-              <Td>
-                <div style={{ fontWeight: 'bold' }}>B/L: {cargo.bl_number}</div>
-                <div style={{ fontSize: '0.85em', color: '#666', marginTop: '4px' }}>
-                  📋 BKG: {cargo.booking_number}
-                </div>
-                <div style={{ fontSize: '0.85em', color: '#666' }}>
-                  📦 {cargo.container_numbers.join(', ')}
-                </div>
-              </Td>
-              <Td>
-                <div style={{ fontWeight: 'bold' }}>🏭 {cargo.shipper_name}</div>
-                <div style={{ fontSize: '0.85em', color: '#666', marginTop: '4px' }}>
-                  🏢 {cargo.consignee_name}
-                </div>
-              </Td>
-              <Td>
-                <TypeBadge $type={cargo.cargo_type}>
-                  {getTypeLabel(cargo.cargo_type)}
-                </TypeBadge>
-                <div style={{ marginTop: '4px' }}>
-                  <WeightText>{(cargo.weight_kg / 1000).toFixed(1)}t</WeightText>
-                  <span style={{ fontSize: '0.85em', color: '#666', marginLeft: '8px' }}>
-                    {cargo.volume_cbm}㎥
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.85em', color: '#666', marginTop: '4px' }}>
-                  📦 {cargo.commodity}
-                </div>
-                {cargo.temperature && (
-                  <div style={{ fontSize: '0.85em', color: '#059669', fontWeight: 'bold' }}>
-                    🌡️ {cargo.temperature}°C
+      <TableContainer>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHeaderCell>注文番号</TableHeaderCell>
+              <TableHeaderCell>顧客名</TableHeaderCell>
+              <TableHeaderCell>注文日</TableHeaderCell>
+              <TableHeaderCell>配送予定日</TableHeaderCell>
+              <TableHeaderCell>注文ステータス</TableHeaderCell>
+              <TableHeaderCell>支払状況</TableHeaderCell>
+              <TableHeaderCell>金額</TableHeaderCell>
+              <TableHeaderCell>商品</TableHeaderCell>
+              <TableHeaderCell>追跡番号</TableHeaderCell>
+              <TableHeaderCell>アクション</TableHeaderCell>
+            </TableRow>
+          </TableHeader>
+          <tbody>
+            {filteredOrders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell>
+                  <div style={{ fontWeight: 600 }}>
+                    {order.order_number}
                   </div>
-                )}
-                {cargo.dangerous_goods && (
-                  <SpecialBadge>⚠️ 危険物</SpecialBadge>
-                )}
-                {cargo.special_handling.map((handling, index) => (
-                  <SpecialBadge key={index}>{handling}</SpecialBadge>
-                ))}
-              </Td>
-              <Td>
-                <div style={{ fontWeight: 'bold' }}>
-                  {cargo.port_of_loading} → {cargo.port_of_discharge}
-                </div>
-                <div style={{ fontSize: '0.85em', color: '#666', marginTop: '4px' }}>
-                  🚢 {cargo.vessel_name}
-                </div>
-                <div style={{ fontSize: '0.85em', color: '#666' }}>
-                  📋 {cargo.voyage_number}
-                </div>
-              </Td>
-              <Td>
-                <div style={{ fontSize: '0.85em' }}>
-                  <div>ETD: {new Date(cargo.etd).toLocaleDateString('ja-JP')}</div>
-                  <div style={{ marginTop: '2px' }}>
-                    ETA: {new Date(cargo.eta).toLocaleDateString('ja-JP')}
+                </TableCell>
+                <TableCell>
+                  <div>
+                    <div style={{ fontWeight: 600, marginBottom: '2px' }}>
+                      {order.customer_name}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#6b7280' }}>
+                      {order.customer_email}
+                    </div>
                   </div>
-                </div>
-              </Td>
-              <Td>
-                <CustomsBadge $status={cargo.customs_status}>
-                  {getCustomsLabel(cargo.customs_status)}
-                </CustomsBadge>
-                <div style={{ fontSize: '0.85em', color: '#666', marginTop: '4px' }}>
-                  書類: {cargo.documentation_complete ? '✅ 完了' : '⏳ 未完了'}
-                </div>
-                <div style={{ fontSize: '0.85em', color: '#666' }}>
-                  運賃: {cargo.freight_charges.toLocaleString()} {cargo.currency}
-                </div>
-              </Td>
-              <Td>
-                <StatusBadge $status={cargo.cargo_status}>
-                  {getStatusLabel(cargo.cargo_status)}
-                </StatusBadge>
-              </Td>
-              <Td>
-                <ActionButtons>
-                  <Button $variant="secondary" onClick={() => alert('詳細表示機能は準備中です')}>
-                    詳細
-                  </Button>
-                  <Button 
-                    $variant="primary" 
-                    onClick={() => alert('追跡機能は準備中です')}
-                  >
-                    追跡
-                  </Button>
-                  {!cargo.documentation_complete && (
-                    <Button 
-                      $variant="success" 
-                      onClick={() => alert('書類管理機能は準備中です')}
-                    >
-                      書類
-                    </Button>
+                </TableCell>
+                <TableCell>{formatDate(order.order_date)}</TableCell>
+                <TableCell>{formatDate(order.delivery_date)}</TableCell>
+                <TableCell>
+                  <StatusBadge $status={order.order_status}>
+                    {getStatusLabel(order.order_status)}
+                  </StatusBadge>
+                </TableCell>
+                <TableCell>
+                  <PaymentBadge $status={order.payment_status}>
+                    {getPaymentLabel(order.payment_status)}
+                  </PaymentBadge>
+                </TableCell>
+                <TableCell>
+                  <div style={{ fontWeight: 600 }}>
+                    ¥{order.total_amount.toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#6b7280' }}>
+                    {order.currency}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <ItemsList>
+                    {order.items.map((item, index) => (
+                      <div key={index}>
+                        {item.product_name} x {item.quantity}
+                      </div>
+                    ))}
+                  </ItemsList>
+                </TableCell>
+                <TableCell>
+                  {order.tracking_number ? (
+                    <span style={{ fontFamily: 'monospace', fontSize: '11px' }}>
+                      {order.tracking_number}
+                    </span>
+                  ) : (
+                    <span style={{ color: '#6b7280' }}>-</span>
                   )}
-                </ActionButtons>
-              </Td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+                </TableCell>
+                <TableCell>
+                  <ActionButtons>
+                    <Button>詳細</Button>
+                    <Button>編集</Button>
+                    <Button $variant="danger">キャンセル</Button>
+                  </ActionButtons>
+                </TableCell>
+              </TableRow>
+            ))}
+          </tbody>
+        </Table>
+      </TableContainer>
     </PageContainer>
   )
 }
