@@ -13,6 +13,7 @@ export const theme = {
     black: '#000000',
     
     // グレースケール
+    gray50: '#f8f9fa',
     gray100: '#f8f9fa',
     gray200: '#e9ecef',
     gray300: '#dee2e6',

@@ -289,7 +289,7 @@ const RatingStars = styled.div<{ $rating: number }>`
   gap: 2px;
   
   &::before {
-    content: '${({ $rating }) => '★'.repeat($rating)}${'☆'.repeat(5 - $rating)}';
+    content: '${({ $rating }) => '★'.repeat($rating) + '☆'.repeat(5 - $rating)}';
     color: #fbbf24;
   }
 `
