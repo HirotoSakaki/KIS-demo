@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import { useAuth } from '../hooks/useAuth'
 
 const PageContainer = styled.div`
   background: ${({ theme }) => theme.colors.white};
@@ -136,7 +135,6 @@ const RestrictedMessage = styled.div`
 `
 
 const PermissionMatrixPage: React.FC = () => {
-  const { user } = useAuth()
 
   // サンプルデータ（実際はAPIから取得）
   const screens = [
@@ -198,21 +196,7 @@ const PermissionMatrixPage: React.FC = () => {
     delete: '#fce4ec'
   }
 
-  if (user?.role !== 'admin') {
-    return (
-      <PageContainer>
-        <Header>
-          <Title>権限マトリックス</Title>
-          <Description>システムの権限設定を確認できます</Description>
-        </Header>
-        <RestrictedMessage>
-          この画面は管理者のみアクセス可能です。
-          <br />
-          現在のユーザー: {user?.username} ({user?.role})
-        </RestrictedMessage>
-      </PageContainer>
-    )
-  }
+  // 管理者モード（認証なし）のため、制限メッセージは削除
 
   return (
     <PageContainer>
