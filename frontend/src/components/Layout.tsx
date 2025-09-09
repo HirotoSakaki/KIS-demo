@@ -1,7 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -105,7 +104,6 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, logout } = useAuth()
   const location = useLocation()
 
   const navigationItems = [
@@ -142,11 +140,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <PageTitle>{getPageTitle(location.pathname)}</PageTitle>
           <UserInfo>
             <UserName>
-              {user?.username} ({user?.role === 'admin' ? '管理者' : 'ユーザー'})
+              管理者モード（認証なし）
             </UserName>
-            <LogoutButton onClick={logout}>
-              ログアウト
-            </LogoutButton>
           </UserInfo>
         </Header>
         {children}

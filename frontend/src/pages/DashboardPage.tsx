@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
-import { useAuth } from '../hooks/useAuth'
 
 const DashboardContainer = styled.div`
   display: grid;
