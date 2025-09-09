@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { Customer, PaginatedResponse } from '../types'
-import { customerApi } from '../utils/api'
-import { useAuth } from '../hooks/useAuth'
+// import { customerApi } from '../utils/api'
 
 const PageContainer = styled.div`
   background: ${({ theme }) => theme.colors.white};
@@ -153,77 +152,69 @@ const PaginationInfo = styled.div`
 `
 
 const CustomersPage: React.FC = () => {
-  const { user } = useAuth()
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  // サンプルデータ（API接続なし）
+  const [customers] = useState<Customer[]>([
+    {
+      id: 1,
+      customer_code: 'CUST001',
+      name: '株式会社サンプル',
+      email: 'contact@sample.co.jp',
+      phone: '03-1234-5678',
+      address: '東京都渋谷区サンプル1-2-3',
+      created_at: '2024-01-15T09:00:00Z',
+      updated_at: '2024-01-15T09:00:00Z',
+      created_by: 1
+    },
+    {
+      id: 2,
+      customer_code: 'CUST002',
+      name: '田中太郎',
+      email: 'tanaka@example.com',
+      phone: '090-1234-5678',
+      address: '大阪府大阪市サンプル区4-5-6',
+      created_at: '2024-01-16T10:00:00Z',
+      updated_at: '2024-01-16T10:00:00Z',
+      created_by: 1
+    },
+    {
+      id: 3,
+      customer_code: 'CUST003',
+      name: '山田商事株式会社',
+      email: 'info@yamada-shouji.co.jp',
+      phone: '052-123-4567',
+      address: '愛知県名古屋市サンプル区7-8-9',
+      created_at: '2024-01-17T11:00:00Z',
+      updated_at: '2024-01-17T11:00:00Z',
+      created_by: 1
+    }
+  ])
+  const [loading] = useState(false)
+  const [error] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const [pagination, setPagination] = useState({
+  const [pagination] = useState({
     page: 1,
     limit: 10,
-    total: 0,
-    totalPages: 0
+    total: 3,
+    totalPages: 1
   })
 
-  const loadCustomers = async () => {
-    try {
-      setLoading(true)
-      setError('')
-      
-      const params = {
-        page: pagination.page,
-        limit: pagination.limit,
-        ...(searchTerm && { name: searchTerm })
-      }
-      
-      const response = await customerApi.getCustomers(params)
-      
-      if (response.data.success) {
-        const data: PaginatedResponse<Customer> = response.data.data
-        setCustomers(data.data)
-        setPagination(prev => ({
-          ...prev,
-          total: data.total,
-          totalPages: data.totalPages
-        }))
-      } else {
-        setError(response.data.error || '顧客データの取得に失敗しました')
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'エラーが発生しました')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadCustomers()
-  }, [pagination.page, pagination.limit])
+  // 検索フィルタリング
+  const filteredCustomers = customers.filter(customer =>
+    customer.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   const handleSearch = () => {
-    setPagination(prev => ({ ...prev, page: 1 }))
-    loadCustomers()
+    // 検索は既にfilteredCustomersで処理されている
   }
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('この顧客を削除してもよろしいですか？')) {
-      return
-    }
-
-    try {
-      const response = await customerApi.deleteCustomer(id)
-      if (response.data.success) {
-        loadCustomers() // リストを再読み込み
-      } else {
-        alert(response.data.error || '削除に失敗しました')
-      }
-    } catch (err: any) {
-      alert(err.response?.data?.error || '削除エラーが発生しました')
+  const handleDelete = (id: number) => {
+    if (window.confirm('この顧客を削除してもよろしいですか？')) {
+      alert('デモ版では削除機能は無効です')
     }
   }
 
-  const canCreate = user?.role === 'admin'
-  const canDelete = user?.role === 'admin'
+  const canCreate = true  // 管理者モード
+  const canDelete = true  // 管理者モード
 
   return (
     <PageContainer>
@@ -250,7 +241,7 @@ const CustomersPage: React.FC = () => {
 
       {loading ? (
         <LoadingMessage>読み込み中...</LoadingMessage>
-      ) : customers.length === 0 ? (
+      ) : filteredCustomers.length === 0 ? (
         <EmptyMessage>
           {searchTerm ? '検索条件に一致する顧客が見つかりません' : '顧客データがありません'}
         </EmptyMessage>
@@ -268,7 +259,7 @@ const CustomersPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {customers.map((customer) => (
+              {filteredCustomers.map((customer) => (
                 <tr key={customer.id}>
                   <Td>{customer.customer_code}</Td>
                   <Td>{customer.name}</Td>
@@ -299,26 +290,12 @@ const CustomersPage: React.FC = () => {
 
           <Pagination>
             <PaginationInfo>
-              {pagination.total} 件中 {(pagination.page - 1) * pagination.limit + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} 件を表示
+              {filteredCustomers.length} 件中 1 - {filteredCustomers.length} 件を表示
             </PaginationInfo>
             <div>
-              <Button 
-                $variant="secondary" 
-                disabled={pagination.page <= 1}
-                onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-              >
-                前へ
-              </Button>
               <span style={{ margin: '0 16px' }}>
-                {pagination.page} / {pagination.totalPages}
+                1 / 1 ページ
               </span>
-              <Button 
-                $variant="secondary" 
-                disabled={pagination.page >= pagination.totalPages}
-                onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-              >
-                次へ
-              </Button>
             </div>
           </Pagination>
         </>

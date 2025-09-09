@@ -139,7 +139,6 @@ const PermissionBadge = styled.span<{ $hasPermission: boolean }>`
 `
 
 const DashboardPage: React.FC = () => {
-  const { user } = useAuth()
   const [stats] = useState({
     customers: 3,
     products: 4,
@@ -170,21 +169,21 @@ const DashboardPage: React.FC = () => {
     }
   ]
 
-  // 現在のユーザーの権限例（サンプルデータ）
+  // 管理者権限（認証なし）のサンプルデータ
   const userPermissions = {
-    '顧客登録': user?.role === 'admin',
+    '顧客登録': true,
     '顧客検索': true,
-    '顧客削除': user?.role === 'admin',
+    '顧客削除': true,
     '注文照会': true,
-    '注文訂正': user?.role === 'admin',
-    '注文取消': user?.role === 'admin',
+    '注文訂正': true,
+    '注文取消': true,
   }
 
   return (
     <>
       <WelcomeSection>
         <WelcomeTitle>
-          ようこそ、{user?.username}さん！
+          ようこそ、KIS Demo へ！
         </WelcomeTitle>
         <WelcomeText>
           KIS Demo - CRUD マトリックス管理システムへようこそ。
