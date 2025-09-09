@@ -295,7 +295,7 @@ const InvoicesPage: React.FC = () => {
     {
       id: 1,
       invoice_number: 'INV-2024-001',
-      customer_name: '株式会社サンプル',
+      customer_name: 'サンプル商事株式会社',
       customer_id: 1,
       issue_date: '2024-01-01',
       due_date: '2024-01-31',
@@ -314,7 +314,7 @@ const InvoicesPage: React.FC = () => {
     {
       id: 2,
       invoice_number: 'INV-2024-002',
-      customer_name: '東京商事株式会社',
+      customer_name: 'キャピタル商事株式会社',
       customer_id: 2,
       issue_date: '2024-01-05',
       due_date: '2024-02-05',
@@ -331,7 +331,7 @@ const InvoicesPage: React.FC = () => {
     {
       id: 3,
       invoice_number: 'INV-2024-003',
-      customer_name: '大阪製造業株式会社',
+      customer_name: 'ウエスト製造業株式会社',
       customer_id: 3,
       issue_date: '2023-12-15',
       due_date: '2024-01-15',
@@ -348,7 +348,7 @@ const InvoicesPage: React.FC = () => {
     {
       id: 4,
       invoice_number: 'INV-2024-004',
-      customer_name: '九州リテール株式会社',
+      customer_name: 'サウスリテール株式会社',
       customer_id: 4,
       issue_date: '2024-01-10',
       due_date: '2024-02-10',
@@ -364,7 +364,7 @@ const InvoicesPage: React.FC = () => {
     {
       id: 5,
       invoice_number: 'INV-2024-005',
-      customer_name: '北海道パートナーズ',
+      customer_name: 'ノースパートナーズ',
       customer_id: 5,
       issue_date: '2023-11-01',
       due_date: '2023-12-01',
