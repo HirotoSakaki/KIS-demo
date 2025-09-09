@@ -108,13 +108,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navigationItems = [
     { path: '/dashboard', label: 'ダッシュボード', icon: '📊' },
-    { path: '/customers', label: '顧客管理', icon: '👥' },
-    { path: '/products', label: '商品管理', icon: '📦' },
-    { path: '/orders', label: '注文管理', icon: '📝' },
-    { path: '/partners', label: '取引先管理', icon: '🤝' },
-    { path: '/suppliers', label: '仕入先管理', icon: '🏭' },
-    { path: '/invoices', label: '請求書管理', icon: '💸' },
-    { path: '/inventory', label: '在庫管理', icon: '📊' },
+    { path: '/shippers', label: '荷主・代理店管理', icon: '🏭' },
+    { path: '/vessels', label: '船舶・運航管理', icon: '🚢' },
+    { path: '/cargo', label: '貨物・積荷管理', icon: '📦' },
+    { path: '/terminals', label: 'ターミナル・港湾管理', icon: '🏗️' },
+    { path: '/crew', label: '船員・乗組員管理', icon: '👨‍✈️' },
+    { path: '/documents', label: '契約・船積書類管理', icon: '📋' },
+    { path: '/schedules', label: 'スケジュール・ダイヤ管理', icon: '⏰' },
   ]
 
   const getPageTitle = (pathname: string) => {

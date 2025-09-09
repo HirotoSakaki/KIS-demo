@@ -5,9 +5,9 @@ import { theme } from './styles/theme'
 import GlobalStyle from './styles/GlobalStyle'
 import Layout from './components/Layout'
 import DashboardPage from './pages/DashboardPage'
-import CustomersPage from './pages/CustomersPage'
-import ProductsPage from './pages/ProductsPage'
-import OrdersPage from './pages/OrdersPage'
+import ShippersPage from './pages/ShippersPage'
+import VesselsPage from './pages/VesselsPage'
+import CargoPage from './pages/CargoPage'
 import PartnersPage from './pages/PartnersPage'
 import SuppliersPage from './pages/SuppliersPage'
 import InvoicesPage from './pages/InvoicesPage'
@@ -22,13 +22,13 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/customers" element={<CustomersPage />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/partners" element={<PartnersPage />} />
-            <Route path="/suppliers" element={<SuppliersPage />} />
-            <Route path="/invoices" element={<InvoicesPage />} />
-            <Route path="/inventory" element={<InventoryPage />} />
+            <Route path="/shippers" element={<ShippersPage />} />
+            <Route path="/vessels" element={<VesselsPage />} />
+            <Route path="/cargo" element={<CargoPage />} />
+            <Route path="/terminals" element={<PartnersPage />} />
+            <Route path="/crew" element={<SuppliersPage />} />
+            <Route path="/documents" element={<InvoicesPage />} />
+            <Route path="/schedules" element={<InventoryPage />} />
           </Routes>
         </Layout>
       </Router>
