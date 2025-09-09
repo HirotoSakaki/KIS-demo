@@ -111,7 +111,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: '/customers', label: '顧客管理', icon: '👥' },
     { path: '/products', label: '商品管理', icon: '📦' },
     { path: '/orders', label: '注文管理', icon: '📝' },
-    { path: '/permissions', label: '権限マトリックス', icon: '🔐' },
   ]
 
   const getPageTitle = (pathname: string) => {

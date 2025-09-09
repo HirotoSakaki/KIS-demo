@@ -6,7 +6,8 @@ import GlobalStyle from './styles/GlobalStyle'
 import Layout from './components/Layout'
 import DashboardPage from './pages/DashboardPage'
 import CustomersPage from './pages/CustomersPage'
-import PermissionMatrixPage from './pages/PermissionMatrixPage'
+import ProductsPage from './pages/ProductsPage'
+import OrdersPage from './pages/OrdersPage'
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/customers" element={<CustomersPage />} />
-            <Route path="/permissions" element={<PermissionMatrixPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
           </Routes>
         </Layout>
       </Router>

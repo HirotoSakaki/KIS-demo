@@ -1,32 +1,177 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
-const DashboardContainer = styled.div`
+const DashboardGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr;
+  gap: ${({ theme }) => theme.spacing.xl};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+`
+
+const StatsContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: ${({ theme }) => theme.spacing.lg};
   margin-bottom: ${({ theme }) => theme.spacing.xl};
 `
 
-const StatsCard = styled.div`
-  background: ${({ theme }) => theme.colors.white};
-  padding: ${({ theme }) => theme.spacing.lg};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  box-shadow: ${({ theme }) => theme.shadows.md};
-  border-left: 4px solid ${({ theme }) => theme.colors.primary};
+const StatsCard = styled.div<{ $color: string }>`
+  background: linear-gradient(135deg, ${({ $color }) => $color}15, ${({ $color }) => $color}08);
+  padding: ${({ theme }) => theme.spacing.xl};
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+  border: 1px solid ${({ $color }) => $color}20;
+  position: relative;
+  overflow: hidden;
+  transition: ${({ theme }) => theme.transitions.normal};
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${({ theme }) => theme.shadows.xl};
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: ${({ $color }) => $color};
+  }
+`
+
+const StatsIcon = styled.div<{ $color: string }>`
+  width: 60px;
+  height: 60px;
+  background: ${({ $color }) => $color}20;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
 `
 
 const StatsTitle = styled.h3`
-  font-size: ${({ theme }) => theme.fontSize.lg};
+  font-size: ${({ theme }) => theme.fontSize.sm};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   color: ${({ theme }) => theme.colors.textSecondary};
   margin-bottom: ${({ theme }) => theme.spacing.sm};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `
 
-const StatsValue = styled.div`
+const StatsValue = styled.div<{ $color: string }>`
   font-size: ${({ theme }) => theme.fontSize.xxxl};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
-  color: ${({ theme }) => theme.colors.primary};
+  color: ${({ $color }) => $color};
+  margin-bottom: ${({ theme }) => theme.spacing.xs};
+`
+
+const StatsChange = styled.div<{ $positive: boolean }>`
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme, $positive }) => $positive ? theme.colors.success : theme.colors.danger};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  
+  &::before {
+    content: '${({ $positive }) => $positive ? '↗' : '↘'}';
+    margin-right: 4px;
+  }
+`
+
+const ChartsContainer = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: ${({ theme }) => theme.spacing.xl};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const ChartCard = styled.div`
+  background: ${({ theme }) => theme.colors.white};
+  padding: ${({ theme }) => theme.spacing.xl};
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+  border: 1px solid ${({ theme }) => theme.colors.borderLight};
+`
+
+const ChartTitle = styled.h3`
+  font-size: ${({ theme }) => theme.fontSize.xl};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  color: ${({ theme }) => theme.colors.textPrimary};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`
+
+const SimpleChart = styled.div`
+  height: 200px;
+  display: flex;
+  align-items: end;
+  gap: 4px;
+  padding: ${({ theme }) => theme.spacing.md} 0;
+  border-bottom: 2px solid ${({ theme }) => theme.colors.borderLight};
+  position: relative;
+`
+
+const ChartBar = styled.div<{ $height: number; $color: string }>`
+  flex: 1;
+  height: ${({ $height }) => $height}%;
+  background: linear-gradient(to top, ${({ $color }) => $color}, ${({ $color }) => $color}80);
+  border-radius: 2px 2px 0 0;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    opacity: 0.8;
+    transform: scaleY(1.05);
+  }
+`
+
+const ActivityFeed = styled.div`
+  max-height: 300px;
+  overflow-y: auto;
+`
+
+const ActivityItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  padding: ${({ theme }) => theme.spacing.md} 0;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.borderLight};
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`
+
+const ActivityIcon = styled.div<{ $color: string }>`
+  width: 40px;
+  height: 40px;
+  background: ${({ $color }) => $color}20;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+`
+
+const ActivityContent = styled.div`
+  flex: 1;
+`
+
+const ActivityText = styled.div`
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+`
+
+const ActivityTime = styled.div`
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  margin-top: 2px;
 `
 
 const WelcomeSection = styled.div`
@@ -140,11 +285,50 @@ const PermissionBadge = styled.span<{ $hasPermission: boolean }>`
 
 const DashboardPage: React.FC = () => {
   const [stats] = useState({
-    customers: 3,
-    products: 4,
-    orders: 3,
-    users: 2
+    customers: 127,
+    products: 89,
+    orders: 256,
+    revenue: 15840000
   })
+
+  // 過去30日間の売上データ（擬似データ）
+  const [salesData] = useState(() => {
+    const data = []
+    const today = new Date()
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - i)
+      const baseAmount = Math.random() * 200000 + 50000
+      data.push({
+        date: date.toISOString().split('T')[0],
+        amount: Math.floor(baseAmount),
+        orders: Math.floor(Math.random() * 15) + 5
+      })
+    }
+    return data
+  })
+
+  // リアルタイム風の数値アニメーション
+  const [animatedStats, setAnimatedStats] = useState({
+    customers: 0,
+    products: 0,
+    orders: 0,
+    revenue: 0
+  })
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAnimatedStats(prev => ({
+        customers: Math.min(prev.customers + Math.ceil((stats.customers - prev.customers) * 0.1), stats.customers),
+        products: Math.min(prev.products + Math.ceil((stats.products - prev.products) * 0.1), stats.products),
+        orders: Math.min(prev.orders + Math.ceil((stats.orders - prev.orders) * 0.1), stats.orders),
+        revenue: Math.min(prev.revenue + Math.ceil((stats.revenue - prev.revenue) * 0.1), stats.revenue)
+      }))
+    }, 50)
+
+    setTimeout(() => clearInterval(interval), 2000)
+    return () => clearInterval(interval)
+  }, [stats])
 
   const features = [
     {
@@ -179,82 +363,94 @@ const DashboardPage: React.FC = () => {
     '注文取消': true,
   }
 
+  // 最近のアクティビティ（擬似データ）
+  const recentActivities = [
+    { icon: '🛒', text: '新規注文が作成されました', time: '2分前', color: '#3b82f6' },
+    { icon: '👤', text: '新規顧客が登録されました', time: '15分前', color: '#10b981' },
+    { icon: '📦', text: '商品在庫が更新されました', time: '32分前', color: '#f59e0b' },
+    { icon: '🚚', text: '注文が発送されました', time: '1時間前', color: '#8b5cf6' },
+    { icon: '✅', text: '注文が完了しました', time: '2時間前', color: '#06d6a0' }
+  ]
+
+  const maxSalesAmount = Math.max(...salesData.map(d => d.amount))
+
   return (
-    <>
+    <DashboardGrid>
       <WelcomeSection>
         <WelcomeTitle>
           ようこそ、KIS Demo へ！
         </WelcomeTitle>
         <WelcomeText>
-          KIS Demo - CRUD マトリックス管理システムへようこそ。
-          <br />
-          このシステムでは、顧客・商品・注文の管理と、それぞれの操作権限をきめ細かく制御できます。
+          リアルタイムビジネスダッシュボード - 売上、注文、在庫状況を一目で把握
         </WelcomeText>
       </WelcomeSection>
 
-      <DashboardContainer>
-        <StatsCard>
-          <StatsTitle>顧客数</StatsTitle>
-          <StatsValue>{stats.customers}</StatsValue>
+      <StatsContainer>
+        <StatsCard $color="#3b82f6">
+          <StatsIcon $color="#3b82f6">👥</StatsIcon>
+          <StatsTitle>総顧客数</StatsTitle>
+          <StatsValue $color="#3b82f6">{animatedStats.customers.toLocaleString()}</StatsValue>
+          <StatsChange $positive={true}>+12% 先月比</StatsChange>
         </StatsCard>
         
-        <StatsCard>
+        <StatsCard $color="#10b981">
+          <StatsIcon $color="#10b981">📦</StatsIcon>
           <StatsTitle>商品数</StatsTitle>
-          <StatsValue>{stats.products}</StatsValue>
+          <StatsValue $color="#10b981">{animatedStats.products.toLocaleString()}</StatsValue>
+          <StatsChange $positive={true}>+5% 先月比</StatsChange>
         </StatsCard>
         
-        <StatsCard>
-          <StatsTitle>注文数</StatsTitle>
-          <StatsValue>{stats.orders}</StatsValue>
+        <StatsCard $color="#f59e0b">
+          <StatsIcon $color="#f59e0b">📝</StatsIcon>
+          <StatsTitle>今月の注文</StatsTitle>
+          <StatsValue $color="#f59e0b">{animatedStats.orders.toLocaleString()}</StatsValue>
+          <StatsChange $positive={true}>+18% 先月比</StatsChange>
         </StatsCard>
         
-        <StatsCard>
-          <StatsTitle>ユーザー数</StatsTitle>
-          <StatsValue>{stats.users}</StatsValue>
+        <StatsCard $color="#8b5cf6">
+          <StatsIcon $color="#8b5cf6">💰</StatsIcon>
+          <StatsTitle>月間売上</StatsTitle>
+          <StatsValue $color="#8b5cf6">¥{animatedStats.revenue.toLocaleString()}</StatsValue>
+          <StatsChange $positive={true}>+23% 先月比</StatsChange>
         </StatsCard>
-      </DashboardContainer>
+      </StatsContainer>
 
-      <FeatureGrid>
-        {features.map((feature, index) => (
-          <FeatureCard key={index}>
-            <FeatureIcon>{feature.icon}</FeatureIcon>
-            <FeatureTitle>{feature.title}</FeatureTitle>
-            <FeatureDescription>{feature.description}</FeatureDescription>
-          </FeatureCard>
-        ))}
-      </FeatureGrid>
-
-      <PermissionMatrixSection>
-        <MatrixTitle>あなたの権限状況</MatrixTitle>
-        <MatrixTable>
-          <thead>
-            <tr>
-              <th>機能</th>
-              <th>権限状況</th>
-              <th>説明</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(userPermissions).map(([screen, hasPermission]) => (
-              <tr key={screen}>
-                <td>{screen}</td>
-                <td>
-                  <PermissionBadge $hasPermission={hasPermission}>
-                    {hasPermission ? '許可' : '制限'}
-                  </PermissionBadge>
-                </td>
-                <td>
-                  {hasPermission 
-                    ? 'この機能を使用できます' 
-                    : '管理者権限が必要です'
-                  }
-                </td>
-              </tr>
+      <ChartsContainer>
+        <ChartCard>
+          <ChartTitle>過去30日間の売上推移</ChartTitle>
+          <SimpleChart>
+            {salesData.slice(-14).map((data, index) => (
+              <ChartBar
+                key={index}
+                $height={(data.amount / maxSalesAmount) * 100}
+                $color={index % 2 === 0 ? '#3b82f6' : '#06d6a0'}
+                title={`${data.date}: ¥${data.amount.toLocaleString()}`}
+              />
             ))}
-          </tbody>
-        </MatrixTable>
-      </PermissionMatrixSection>
-    </>
+          </SimpleChart>
+          <div style={{ marginTop: '16px', fontSize: '14px', color: '#6b7280' }}>
+            直近2週間の日別売上（ホバーで詳細表示）
+          </div>
+        </ChartCard>
+
+        <ChartCard>
+          <ChartTitle>最近のアクティビティ</ChartTitle>
+          <ActivityFeed>
+            {recentActivities.map((activity, index) => (
+              <ActivityItem key={index}>
+                <ActivityIcon $color={activity.color}>
+                  {activity.icon}
+                </ActivityIcon>
+                <ActivityContent>
+                  <ActivityText>{activity.text}</ActivityText>
+                  <ActivityTime>{activity.time}</ActivityTime>
+                </ActivityContent>
+              </ActivityItem>
+            ))}
+          </ActivityFeed>
+        </ChartCard>
+      </ChartsContainer>
+    </DashboardGrid>
   )
 }
 
