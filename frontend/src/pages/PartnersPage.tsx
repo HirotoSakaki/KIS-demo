@@ -309,7 +309,7 @@ const PartnersPage: React.FC = () => {
   const [partners] = useState<Partner[]>([
     {
       id: 1,
-      company_name: '東京商事株式会社',
+      company_name: 'キャピタル商事株式会社',
       contact_person: '田中太郎',
       email: 'tanaka@tokyo-shoji.co.jp',
       phone: '03-1234-5678',
@@ -324,7 +324,7 @@ const PartnersPage: React.FC = () => {
     },
     {
       id: 2,
-      company_name: '大阪流通センター',
+      company_name: 'ウエスト流通センター',
       contact_person: '佐藤花子',
       email: 'sato@osaka-dist.co.jp',
       phone: '06-9876-5432',
@@ -339,7 +339,7 @@ const PartnersPage: React.FC = () => {
     },
     {
       id: 3,
-      company_name: '九州リテール株式会社',
+      company_name: 'サウスリテール株式会社',
       contact_person: '鈴木一郎',
       email: 'suzuki@kyushu-retail.com',
       phone: '092-555-1234',
@@ -354,7 +354,7 @@ const PartnersPage: React.FC = () => {
     },
     {
       id: 4,
-      company_name: '北海道パートナーズ',
+      company_name: 'ノースパートナーズ',
       contact_person: '高橋雅子',
       email: 'takahashi@hokkaido-partners.jp',
       phone: '011-777-8888',
@@ -369,7 +369,7 @@ const PartnersPage: React.FC = () => {
     },
     {
       id: 5,
-      company_name: '中部システムズ',
+      company_name: 'セントラルシステムズ',
       contact_person: '山田健一',
       email: 'yamada@chubu-systems.co.jp',
       phone: '052-333-4444',
