@@ -82,11 +82,11 @@ CREATE TABLE IF NOT EXISTS permission_matrix (
     UNIQUE(user_id, entity_type, operation_type, screen_name)
 );
 
--- インデックス作成
-CREATE INDEX idx_customers_code ON customers(customer_code);
-CREATE INDEX idx_products_code ON products(product_code);
-CREATE INDEX idx_orders_number ON orders(order_number);
-CREATE INDEX idx_orders_customer ON orders(customer_id);
-CREATE INDEX idx_order_items_order ON order_items(order_id);
-CREATE INDEX idx_permission_matrix_user ON permission_matrix(user_id);
-CREATE INDEX idx_permission_matrix_entity ON permission_matrix(entity_type, operation_type);
+-- インデックス作成（IF NOT EXISTS を追加）
+CREATE INDEX IF NOT EXISTS idx_customers_code ON customers(customer_code);
+CREATE INDEX IF NOT EXISTS idx_products_code ON products(product_code);
+CREATE INDEX IF NOT EXISTS idx_orders_number ON orders(order_number);
+CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_permission_matrix_user ON permission_matrix(user_id);
+CREATE INDEX IF NOT EXISTS idx_permission_matrix_entity ON permission_matrix(entity_type, operation_type);
